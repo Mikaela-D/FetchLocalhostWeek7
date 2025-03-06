@@ -54,12 +54,12 @@ const ViewProductScreen = ({ navigation }) => {
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "69420", // See: https://stackoverflow.com/questions/73017353/how-to-bypass-ngrok-browser-warning
           },
-          body: JSON.stringify({ ourId: "0" }), // Need to use POST to send body
+          body: JSON.stringify({ ourId: "1" }), // Need to use POST to send body
         }
       );
       const data = await res.json();
-      console.log(JSON.stringify(data));
-      setText(JSON.stringify(data));
+      console.log(data);
+      setProductData(data.theProduct);
     } catch (err) {
       console.log(err);
     }
