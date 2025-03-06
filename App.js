@@ -1,12 +1,14 @@
+// C:\Users\Mikaela\Mobile App Development\FetchLocalhostWeek7\FetchLocalhostWeek7\App.js
+
 // import * as React from 'react';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Button, Text, View } from "react-native";
-import { useState } from "react";
+import { Button, Text, View, FlatList, TouchableOpacity } from "react-native";
+import { useState, useEffect } from "react";
 
 const Stack = createNativeStackNavigator();
 
-export default App = () => {
+export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -17,10 +19,11 @@ export default App = () => {
         />
         <Stack.Screen name="Fetch" component={FetchScreen} />
         <Stack.Screen name="ViewProduct" component={ViewProductScreen} />
+        <Stack.Screen name="ProductList" component={ProductListScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
+}
 
 const HomeScreen = ({ navigation }) => {
   return (
@@ -33,11 +36,54 @@ const HomeScreen = ({ navigation }) => {
         title="Go to View Product Screen"
         onPress={() => navigation.navigate("ViewProduct")}
       />
+      <Button
+        title="Go to Product List"
+        onPress={() => navigation.navigate("ProductList")}
+      />
     </View>
   );
 };
 
-const ViewProductScreen = ({ navigation }) => {
+const ProductListScreen = ({ navigation }) => {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("https://a9ee-193-1-57-1.ngrok-free.app/");
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.log("Error fetching products:", err);
+    }
+  };
+
+  return (
+    <View>
+      <Text style={{ fontSize: 20, fontWeight: "bold" }}>Product List</Text>
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.ourId}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("ViewProduct", { ourId: item.ourId })
+            }
+          >
+            <Text style={{ padding: 10, fontSize: 18 }}>
+              {item.name} - ${item.price}
+            </Text>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
+  );
+};
+
+const ViewProductScreen = ({ route }) => {
   const [productData, setProductData] = useState({
     name: "",
     price: "",
@@ -47,18 +93,15 @@ const ViewProductScreen = ({ navigation }) => {
   const callAPI = async () => {
     try {
       const res = await fetch(
-        `https://a9ee-193-1-57-1.ngrok-free.app/getSpecificProduct`, // ADD MY OWN PATH
+        "https://a9ee-193-1-57-1.ngrok-free.app/getSpecificProduct",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "69420", // See: https://stackoverflow.com/questions/73017353/how-to-bypass-ngrok-browser-warning
-          },
-          body: JSON.stringify({ ourId: "1" }), // Need to use POST to send body
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ourId: route.params.ourId }),
         }
       );
+
       const data = await res.json();
-      console.log(data);
       setProductData(data.theProduct);
     } catch (err) {
       console.log(err);
@@ -70,35 +113,26 @@ const ViewProductScreen = ({ navigation }) => {
       <Text>{"Product Name: " + productData.name}</Text>
       <Text>{"Product ID: " + productData.ourId}</Text>
       <Text>{"Product Price: " + productData.price}</Text>
-      {/* <Text>{text}</Text> */}
-      <Button
-        title="Get product details"
-        onPress={async () => {
-          callAPI();
-        }}
-      />
+      <Button title="Get product details" onPress={callAPI} />
     </View>
   );
 };
 
-const FetchScreen = ({ navigation }) => {
+const FetchScreen = () => {
   const [text, setText] = useState(". . . waiting for fetch API");
 
   const callAPI = async () => {
     try {
       const res = await fetch(
-        `https://a9ee-193-1-57-1.ngrok-free.app/getSpecificProduct`, // add getSpecificProduct
+        "https://a9ee-193-1-57-1.ngrok-free.app/getSpecificProduct",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "69420", // See: https://stackoverflow.com/questions/73017353/how-to-bypass-ngrok-browser-warning
-          },
-          body: JSON.stringify({ ourId: "1" }), // Need to use POST to send body
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ourId: "1" }),
         }
       );
+
       const data = await res.json();
-      //  console.log(data)
       setText(JSON.stringify(data));
     } catch (err) {
       console.log(err);
@@ -108,12 +142,7 @@ const FetchScreen = ({ navigation }) => {
   return (
     <View>
       <Text>{text}</Text>
-      <Button
-        title="Go Fetch Some Data"
-        onPress={async () => {
-          callAPI();
-        }}
-      />
+      <Button title="Go Fetch Some Data" onPress={callAPI} />
     </View>
   );
 };
