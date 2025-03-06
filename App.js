@@ -70,7 +70,7 @@ const ViewProductScreen = ({ navigation }) => {
       <Text>{"Product Name: " + productData.name}</Text>
       <Text>{"Product ID: " + productData.ourId}</Text>
       <Text>{"Product Price: " + productData.price}</Text>
-      <Text>{text}</Text>
+      {/* <Text>{text}</Text> */}
       <Button
         title="Get product details"
         onPress={async () => {
